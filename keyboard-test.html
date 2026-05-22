@@ -7,53 +7,123 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #f5f5f5;
+      --surface: #fff;
+      --border: #e0e0e0;
+      --key-bg: #fafafa;
+      --key-shadow: #d8d8d8;
+      --text: #333;
+      --text-sub: #888;
+      --text-dim: #aaa;
+      --badge-bg: #f0f0f0;
+      --active-bg: #222;
+      --active-border: #222;
+      --active-shadow: #111;
+    }
+
+    body.dark {
+      --bg: #1a1a1a;
+      --surface: #2a2a2a;
+      --border: #3a3a3a;
+      --key-bg: #333;
+      --key-shadow: #111;
+      --text: #e0e0e0;
+      --text-sub: #888;
+      --text-dim: #666;
+      --badge-bg: #3a3a3a;
+      --active-bg: #fff;
+      --active-border: #fff;
+      --active-shadow: #ccc;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f5f5f5;
+      background: var(--bg);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       gap: 32px;
+      transition: background 0.25s;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     h1 {
       font-size: 20px;
       font-weight: 500;
-      color: #555;
+      color: var(--text-sub);
       letter-spacing: 0.05em;
+    }
+
+    /* 다크모드 토글 */
+    #theme-toggle {
+      width: 48px;
+      height: 26px;
+      background: var(--border);
+      border: none;
+      border-radius: 13px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.25s;
+      outline: none;
+    }
+    #theme-toggle::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.25s, background 0.25s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    body.dark #theme-toggle { background: #555; }
+    body.dark #theme-toggle::after { transform: translateX(22px); background: #eee; }
+
+    #theme-label {
+      font-size: 12px;
+      color: var(--text-dim);
     }
 
     /* 입력 표시 영역 */
     #display {
       width: 820px;
       min-height: 54px;
-      background: #fff;
-      border: 1.5px solid #e0e0e0;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
       border-radius: 12px;
       padding: 14px 20px;
       font-size: 18px;
-      color: #222;
+      color: var(--text);
       letter-spacing: 0.03em;
       display: flex;
       align-items: center;
       gap: 6px;
       flex-wrap: wrap;
       box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: background 0.25s, border-color 0.25s;
     }
 
     #display .key-badge {
-      background: #f0f0f0;
+      background: var(--badge-bg);
       border-radius: 6px;
       padding: 2px 10px;
       font-size: 15px;
-      color: #333;
+      color: var(--text);
       animation: fadeIn 0.1s ease;
     }
 
     #display .placeholder {
-      color: #bbb;
+      color: var(--text-dim);
       font-size: 15px;
       font-style: italic;
     }
@@ -68,11 +138,12 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      background: #fff;
+      background: var(--surface);
       padding: 24px 28px;
       border-radius: 20px;
       box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-      border: 1.5px solid #ececec;
+      border: 1.5px solid var(--border);
+      transition: background 0.25s, border-color 0.25s;
     }
 
     .row {
@@ -84,34 +155,36 @@
     .key {
       min-width: 46px;
       height: 46px;
-      background: #fafafa;
-      border: 1.5px solid #e0e0e0;
+      background: var(--key-bg);
+      border: 1.5px solid var(--border);
       border-radius: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       font-size: 12px;
-      color: #444;
+      color: var(--text);
       cursor: default;
       user-select: none;
       transition: background 0.08s, border-color 0.08s, transform 0.08s, box-shadow 0.08s;
-      box-shadow: 0 2px 0 #d8d8d8;
+      box-shadow: 0 2px 0 var(--key-shadow);
       padding: 0 6px;
       position: relative;
     }
 
-    .key .top { font-size: 10px; color: #888; line-height: 1; }
-    .key .main { font-size: 13px; font-weight: 500; color: #333; line-height: 1.3; }
+    .key .top { font-size: 10px; color: var(--text-sub); line-height: 1; }
+    .key .main { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
 
     .key.active {
-      background: #222;
-      border-color: #222;
-      box-shadow: 0 1px 0 #111;
+      background: var(--active-bg);
+      border-color: var(--active-border);
+      box-shadow: 0 1px 0 var(--active-shadow);
       transform: translateY(1px);
     }
-    .key.active .top,
-    .key.active .main { color: #fff; }
+    body:not(.dark) .key.active .top,
+    body:not(.dark) .key.active .main { color: #fff; }
+    body.dark .key.active .top,
+    body.dark .key.active .main { color: #222; }
 
     /* 너비 변형 키 */
     .w15 { min-width: 70px; }
@@ -124,25 +197,29 @@
     /* 하단 상태 */
     #status {
       font-size: 13px;
-      color: #aaa;
+      color: var(--text-dim);
     }
 
     #clear-btn {
       margin-top: -8px;
       padding: 8px 22px;
-      background: #fff;
-      border: 1.5px solid #e0e0e0;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
       border-radius: 8px;
       font-size: 13px;
-      color: #888;
+      color: var(--text-sub);
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
-    #clear-btn:hover { background: #f0f0f0; color: #444; }
+    #clear-btn:hover { background: var(--badge-bg); color: var(--text); }
   </style>
 </head>
 <body>
-  <h1>⌨ Keyboard Input Test</h1>
+  <header>
+    <h1>⌨ Keyboard Input Test</h1>
+    <button id="theme-toggle" onclick="toggleTheme()" title="다크모드 전환"></button>
+    <span id="theme-label">Light</span>
+  </header>
 
   <div id="display"><span class="placeholder">키를 눌러보세요...</span></div>
 
@@ -205,6 +282,24 @@
         { label:'Ctrl', code:'ControlRight', cls:'w15' },
       ],
     ];
+
+    // 다크모드 초기화 (시스템 설정 및 로컬스토리지 반영)
+    function applyTheme(dark) {
+      document.body.classList.toggle('dark', dark);
+      document.getElementById('theme-label').textContent = dark ? 'Dark' : 'Light';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
+
+    function toggleTheme() {
+      applyTheme(!document.body.classList.contains('dark'));
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      applyTheme(savedTheme === 'dark');
+    } else {
+      applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
 
     const codeToEl = {};
 
