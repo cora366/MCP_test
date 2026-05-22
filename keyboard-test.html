@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyboard Input Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 32px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #555;
+      letter-spacing: 0.05em;
+    }
+
+    /* 입력 표시 영역 */
+    #display {
+      width: 820px;
+      min-height: 54px;
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 18px;
+      color: #222;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    #display .key-badge {
+      background: #f0f0f0;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 15px;
+      color: #333;
+      animation: fadeIn 0.1s ease;
+    }
+
+    #display .placeholder {
+      color: #bbb;
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* 키보드 */
+    #keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fff;
+      padding: 24px 28px;
+      border-radius: 20px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      border: 1.5px solid #ececec;
+    }
+
+    .row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .key {
+      min-width: 46px;
+      height: 46px;
+      background: #fafafa;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #444;
+      cursor: default;
+      user-select: none;
+      transition: background 0.08s, border-color 0.08s, transform 0.08s, box-shadow 0.08s;
+      box-shadow: 0 2px 0 #d8d8d8;
+      padding: 0 6px;
+      position: relative;
+    }
+
+    .key .top { font-size: 10px; color: #888; line-height: 1; }
+    .key .main { font-size: 13px; font-weight: 500; color: #333; line-height: 1.3; }
+
+    .key.active {
+      background: #222;
+      border-color: #222;
+      box-shadow: 0 1px 0 #111;
+      transform: translateY(1px);
+    }
+    .key.active .top,
+    .key.active .main { color: #fff; }
+
+    /* 너비 변형 키 */
+    .w15 { min-width: 70px; }
+    .w175 { min-width: 82px; }
+    .w2  { min-width: 98px; }
+    .w225 { min-width: 106px; }
+    .w275 { min-width: 130px; }
+    .w625 { min-width: 300px; }
+
+    /* 하단 상태 */
+    #status {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    #clear-btn {
+      margin-top: -8px;
+      padding: 8px 22px;
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #888;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    #clear-btn:hover { background: #f0f0f0; color: #444; }
+  </style>
+</head>
+<body>
+  <h1>⌨ Keyboard Input Test</h1>
+
+  <div id="display"><span class="placeholder">키를 눌러보세요...</span></div>
+
+  <div id="keyboard"></div>
+
+  <button id="clear-btn" onclick="clearDisplay()">Clear</button>
+  <div id="status">Last key: <span id="last-key">—</span></div>
+
+  <script>
+    const layout = [
+      [
+        { label:'Esc', code:'Escape' },
+        { label:'F1', code:'F1' }, { label:'F2', code:'F2' }, { label:'F3', code:'F3' }, { label:'F4', code:'F4' },
+        { label:'F5', code:'F5' }, { label:'F6', code:'F6' }, { label:'F7', code:'F7' }, { label:'F8', code:'F8' },
+        { label:'F9', code:'F9' }, { label:'F10', code:'F10' }, { label:'F11', code:'F11' }, { label:'F12', code:'F12' },
+      ],
+      [
+        { top:'~', label:'`', code:'Backquote' },
+        { top:'!', label:'1', code:'Digit1' }, { top:'@', label:'2', code:'Digit2' },
+        { top:'#', label:'3', code:'Digit3' }, { top:'$', label:'4', code:'Digit4' },
+        { top:'%', label:'5', code:'Digit5' }, { top:'^', label:'6', code:'Digit6' },
+        { top:'&', label:'7', code:'Digit7' }, { top:'*', label:'8', code:'Digit8' },
+        { top:'(', label:'9', code:'Digit9' }, { top:')', label:'0', code:'Digit0' },
+        { top:'_', label:'-', code:'Minus' }, { top:'+', label:'=', code:'Equal' },
+        { label:'Backspace', code:'Backspace', cls:'w2' },
+      ],
+      [
+        { label:'Tab', code:'Tab', cls:'w15' },
+        { label:'Q', code:'KeyQ' }, { label:'W', code:'KeyW' }, { label:'E', code:'KeyE' },
+        { label:'R', code:'KeyR' }, { label:'T', code:'KeyT' }, { label:'Y', code:'KeyY' },
+        { label:'U', code:'KeyU' }, { label:'I', code:'KeyI' }, { label:'O', code:'KeyO' },
+        { label:'P', code:'KeyP' },
+        { top:'{', label:'[', code:'BracketLeft' }, { top:'}', label:']', code:'BracketRight' },
+        { top:'|', label:'\\', code:'Backslash', cls:'w15' },
+      ],
+      [
+        { label:'Caps', code:'CapsLock', cls:'w175' },
+        { label:'A', code:'KeyA' }, { label:'S', code:'KeyS' }, { label:'D', code:'KeyD' },
+        { label:'F', code:'KeyF' }, { label:'G', code:'KeyG' }, { label:'H', code:'KeyH' },
+        { label:'J', code:'KeyJ' }, { label:'K', code:'KeyK' }, { label:'L', code:'KeyL' },
+        { top:':', label:';', code:'Semicolon' }, { top:'"', label:"'", code:'Quote' },
+        { label:'Enter', code:'Enter', cls:'w225' },
+      ],
+      [
+        { label:'Shift', code:'ShiftLeft', cls:'w275' },
+        { label:'Z', code:'KeyZ' }, { label:'X', code:'KeyX' }, { label:'C', code:'KeyC' },
+        { label:'V', code:'KeyV' }, { label:'B', code:'KeyB' }, { label:'N', code:'KeyN' },
+        { label:'M', code:'KeyM' },
+        { top:'<', label:',', code:'Comma' }, { top:'>', label:'.', code:'Period' },
+        { top:'?', label:'/', code:'Slash' },
+        { label:'Shift', code:'ShiftRight', cls:'w275' },
+      ],
+      [
+        { label:'Ctrl', code:'ControlLeft', cls:'w15' },
+        { label:'Win', code:'MetaLeft', cls:'w15' },
+        { label:'Alt', code:'AltLeft', cls:'w15' },
+        { label:'Space', code:'Space', cls:'w625' },
+        { label:'Alt', code:'AltRight', cls:'w15' },
+        { label:'Win', code:'MetaRight', cls:'w15' },
+        { label:'Ctrl', code:'ControlRight', cls:'w15' },
+      ],
+    ];
+
+    const codeToEl = {};
+
+    const kb = document.getElementById('keyboard');
+    layout.forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'row';
+      row.forEach(k => {
+        const el = document.createElement('div');
+        el.className = 'key' + (k.cls ? ' ' + k.cls : '');
+        if (k.top) {
+          el.innerHTML = `<span class="top">${k.top}</span><span class="main">${k.label}</span>`;
+        } else {
+          el.innerHTML = `<span class="main">${k.label}</span>`;
+        }
+        rowEl.appendChild(el);
+        codeToEl[k.code] = el;
+      });
+      kb.appendChild(rowEl);
+    });
+
+    const display = document.getElementById('display');
+    const lastKey = document.getElementById('last-key');
+    let hasInput = false;
+
+    function addBadge(text) {
+      if (!hasInput) { display.innerHTML = ''; hasInput = true; }
+      const badge = document.createElement('span');
+      badge.className = 'key-badge';
+      badge.textContent = text;
+      display.appendChild(badge);
+      display.scrollTop = display.scrollHeight;
+    }
+
+    function clearDisplay() {
+      display.innerHTML = '<span class="placeholder">키를 눌러보세요...</span>';
+      hasInput = false;
+      lastKey.textContent = '—';
+    }
+
+    document.addEventListener('keydown', e => {
+      e.preventDefault();
+      const el = codeToEl[e.code];
+      if (el) el.classList.add('active');
+      lastKey.textContent = `${e.key} (${e.code})`;
+      addBadge(e.key === ' ' ? 'Space' : e.key);
+    });
+
+    document.addEventListener('keyup', e => {
+      const el = codeToEl[e.code];
+      if (el) el.classList.remove('active');
+    });
+  </script>
+</body>
+</html>
